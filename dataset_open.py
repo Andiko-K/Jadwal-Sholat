@@ -1,4 +1,4 @@
-import csv
+import csv, requests
 def open_data(link = './dataset/dataset_region.csv') -> dict[str, float]:
     '''
     Mempersiapkan data dari dataset_region.csv yang berisi provinsi, kota, dan properti lain
@@ -32,3 +32,18 @@ def get_cities(province, city_loc_dict):
 
 def get_value(province, city, city_loc_dict):
     return city_loc_dict[province][city]
+
+### Metode untuk mendapatkan lokasi pengguna melalui IP Address
+
+def get_ip():
+    response = requests.get('https://api64.ipify.org?format=json').json()
+    return response["ip"]
+
+def get_location():
+    ip_address = get_ip()
+    response = requests.get(f"https://freeipapi.com/api/json/{ip_address}").json()
+    city = response.get("cityName")
+    province = response.get("regionName")
+
+    user_data ={'city': city.upper(), 'province': province.upper()}
+    return user_data
