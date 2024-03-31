@@ -13,25 +13,22 @@ def open_data(link = './dataset/dataset_region.csv') -> dict[str, float]:
 
     city_loc_dict = {}
     for row in city_loc:
-        province = row['province']; city = row['region']
+        city = row['region']
         latitude = row['latitude']; longitude = row['longitude']
         altitude = row['altitude']; timezone = row['timezone']
 
-        if province not in city_loc_dict:
-            city_loc_dict[province] = {}
-            city_loc_dict[province][city] = {'latitude': latitude, 'longitude': longitude,
+        if city not in city_loc_dict:
+            city_loc_dict[city] = {'latitude': latitude, 'longitude': longitude,
                                     'altitude': altitude, 'timezone': timezone}
     data.close()
     return city_loc_dict
 
-def get_provinces(city_loc_dict):
+
+def get_cities(city_loc_dict):
     return [key for key in city_loc_dict.keys()]
 
-def get_cities(province, city_loc_dict):
-    return [key for key in city_loc_dict[province].keys()]
-
-def get_value(province, city, city_loc_dict):
-    return city_loc_dict[province][city]
+def get_value(city, city_loc_dict):
+    return city_loc_dict[city]
 
 ### Metode untuk mendapatkan lokasi pengguna melalui IP Address
 
