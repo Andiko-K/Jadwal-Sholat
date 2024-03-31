@@ -1,4 +1,4 @@
-
+from datetime import datetime
 from math import *
 
 #Dictionary dan list untuk bulan dan tanggal tiap jenis penanggalan
@@ -58,7 +58,7 @@ def Greg_to_JD(date: dict[str, int]) -> float:
     output:
         JD (float)
     '''
-    day,month,year = date['day'], date['month'], date['year']
+    day,month,year = int(date['day']), int(date['month']), int(date['year'])
     if month < 3:
         month += 12; year -= 1
     alpha = int(year/100)
@@ -75,7 +75,7 @@ def Hij_to_JD(date: dict[str, int]) -> float:
     output:
         JD (float)
     '''
-    day,month,year = date['day'], date['month'], date['year']
+    day,month,year = int(date['day']), int(date['month']), int(date['year'])
     sum_of_Hij = 30*354+11
     JD = int(year/30)*sum_of_Hij + 1948438.5
     residue = year%30
@@ -91,6 +91,40 @@ def Hij_to_JD(date: dict[str, int]) -> float:
             JD += i[1][1] 
     JD+=(day+.5)
     return JD
+
+def Greg_to_Hij(date: dict[str, int]) -> dict[str, int]:
+    JD = Greg_to_JD(date) -1.5
+    sum_of_Hij = 30*354+11
+    JD_Hij = JD - 1948438.5 #JD dimulai dari 0 Muharram 1 H
+
+    year = 30*int(JD_Hij/sum_of_Hij)
+    leap_residue = JD_Hij%sum_of_Hij 
+    #sisa tanggal yang tidak terbagi pada year sebagai residue pembagian
+    #menyatakan bahwa residue belum mengalami satu putaran 30 tahun penuh
+    year_residue = int(leap_residue/354)
+    year += year_residue+1 
+
+    day = leap_residue%354
+
+    for i in enumerate(hijri_leap):
+        if year_residue > i[1]:
+            day -= 1
+    for m in hijri_month:
+        if day <= hijri_month[m]:
+            month = m
+            break
+        else:
+            day -= hijri_month[m]
+    hijri_dict = {'day': day, 'month': month, 'year': year}
+    return hijri_dict
+    
+
+#Fungsi untuk mendapatkan tanggal saat ini
+def get_today():
+    dt = datetime.now()
+    date = [i for i in dt.strftime('%d %m %Y %H %M').split(' ')]
+    date_dict = {'day': int(date[0]), 'month': int(date[1]), 'year': int(date[2])}
+    return date_dict
 
 #Algoritma untuk waktu sholat
 class prayer_time:
@@ -160,4 +194,3 @@ class prayer_time:
             'isya': f'{int(isya_time):02d}:{int(isya_time%1*60):02d}'
         }
         return sholat
-
