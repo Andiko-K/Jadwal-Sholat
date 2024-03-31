@@ -128,6 +128,13 @@ def get_today():
                  'month_name': greg_month_name[date[1]-1],'year': date[2]}
     return date_dict
 
+#Fungsi untuk parsing tanggal menjadi string pada main.py
+def date_string(date_greg, date_hijri):
+    str_greg = f"{date_greg['day']} {date_greg['month_name']} {date_greg['year']}"
+    str_hijr = f"{int(date_hijri['day'])} {date_hijri['month']} {date_hijri['year']}"
+    str_full = " / ".join([str_greg, str_hijr])
+    return str_full
+
 #Algoritma untuk waktu sholat
 class prayer_time:
     def __init__(self, pos: dict[str, float], JD: float, const: dict[str, int]):
