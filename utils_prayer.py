@@ -122,8 +122,10 @@ def Greg_to_Hij(date: dict[str, int]) -> dict[str, int]:
 #Fungsi untuk mendapatkan tanggal saat ini
 def get_today():
     dt = datetime.now()
-    date = [i for i in dt.strftime('%d %m %Y %H %M').split(' ')]
-    date_dict = {'day': int(date[0]), 'month': int(date[1]), 'year': int(date[2])}
+    date = [int(i) for i in dt.strftime('%d %m %Y %H %M').split(' ')]
+    greg_month_name = [month for month in greg_month.keys()]
+    date_dict = {'day': date[0], 'month': date[1],
+                 'month_name': greg_month_name[date[1]-1],'year': date[2]}
     return date_dict
 
 #Algoritma untuk waktu sholat
