@@ -103,11 +103,26 @@ vertical2.place(x=517.19, y = 181)
 vertical3.place(x=793.84, y = 181)
 vertical4.place(x=655.52, y = 181)
 
-#parameter_frame
+#parameter_frame------------------------------------------------------------------------------------------------------------------------
 param_frame = CTT.CTkFrame(master = main_frame, fg_color = '#D8E1E8', width = 261,
                            height = 122, corner_radius=15)
 param_frame.place(x=759, y = 291)
 
+param_text = CTT.CTkLabel(master = main_frame, fg_color = '#D8E1E8', width = 163.12, height = 30.32,
+                        text_color = '#000000', font = ('Montserrat', 15, 'underline'), bg_color= '#D8E1E8',
+                        text = 'Parameter Posisi').place(x=811.2, y = 295.91)
+coordinate = "7°59' LS 112°45' BT"
+altitude = 445
+timezone = 7
+param_coordinate = CTT.CTkLabel(master = main_frame, fg_color = '#D8E1E8', width = 247.95, height = 12.99,
+                        text_color = '#000000', font = ('Montserrat', 13), bg_color= '#D8E1E8',
+                        text = f"Koordinat: {coordinate}", anchor = 'w').place(x=765.52, y = 330)
+param_altitude = CTT.CTkLabel(master = main_frame, fg_color = '#D8E1E8', width = 247.95, height = 12.99,
+                        text_color = '#000000', font = ('Montserrat', 13), bg_color= '#D8E1E8',
+                        text = f"Ketinggian: {altitude} MDPL", anchor = 'w').place(x=765.52, y = 357)
+timezone = CTT.CTkLabel(master = main_frame, fg_color = '#D8E1E8', width = 247.95, height = 12.99,
+                        text_color = '#000000', font = ('Montserrat', 13), bg_color= '#D8E1E8',
+                        text = f'Zona Waktu: GMT+0{timezone}', anchor = 'w').place(x=765.52, y = 385)
 #fiqih_frame
 fiqih_frame = CTT.CTkFrame(master = main_frame, fg_color = '#D8E1E8', width = 261,
                            height = 163, corner_radius=15)
