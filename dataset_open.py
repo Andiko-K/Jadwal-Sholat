@@ -25,20 +25,19 @@ def open_data(link = './dataset/dataset_region.csv') -> dict[str, float]:
     data.close()
     return city_loc_dict
 
-city_loc_dict = open_data()
 
-def get_provinces(city_loc_dict = city_loc_dict):
-    return [key for key in city_loc_dict.keys()]
+def get_provinces(data):
+    return [key for key in data.keys()]
 
-def get_cities(province, city_loc_dict = city_loc_dict):
+def get_cities(province, data):
     try:
-        city_list = [key for key in city_loc_dict[province].keys()]
+        city_list = [key for key in data[province].keys()]
     except:
         city_list = []
     return city_list
 
-def get_value(province, city, city_loc_dict = city_loc_dict):
-    return city_loc_dict[province][city]
+def get_value(province, city, data):
+    return data[province][city]
 
 ### Metode untuk mendapatkan lokasi pengguna melalui IP Address
 

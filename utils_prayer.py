@@ -1,5 +1,6 @@
 from datetime import datetime
 from math import *
+import copy
 
 #Dictionary dan list untuk bulan dan tanggal tiap jenis penanggalan
 greg_month = { 'Januari': 31, 'Februari': 28, 'Maret': 31, 'April': 30, 'Mei': 31, 'Juni': 30,
@@ -12,7 +13,11 @@ hijri_month = { 'Muharram': 30, 'Safar': 29, 'Rabiul Awal': 30, 'Rabiul Akhir': 
 hijri_leap = [2,5,7,10,13,16,18,21,24,26,29]
 
 #Nilai konstanta
-prayer_const = {'KA': 1, 'h_isya': -18, 'h_subuh': -20, 'koreksi': -2}
+koreksi_dhuhur = [i for i in range(-10, 11)]
+bayangan_ashar = {"Syafi'i(+1)": 1, 'Hanafi(+2)':2}
+ketinggian_shubuh = [15,16,17.7,18,19.5,20]
+ketinggian_isya = [14,15,17.5,18]
+
 #Cek tahun kabisat pada Penanggalan Masehi dan Hijriyah
 def leap_greg(date: dict[str, int]) -> dict[str, int]:
     '''
@@ -22,7 +27,7 @@ def leap_greg(date: dict[str, int]) -> dict[str, int]:
     output:
         greg_month
     '''
-    year = date['year']
+    year = int(date['year'])
     is_leap_year = (year % 400 == 0) or ((year % 100 != 0) and (year % 4 == 0))
                 
     if is_leap_year:
@@ -40,7 +45,7 @@ def leap_hijri(date: dict[str, int]) -> dict[str, int]:
     output:
         hijri_month
     '''
-    year = date['year']
+    year = int(date['year'])
     is_leap_year = year%30
                 
     if is_leap_year in hijri_leap:
@@ -131,17 +136,17 @@ def get_today():
 #Algoritma untuk waktu sholat
 class prayer_time:
     def __init__(self, pos: dict[str, float], JD: float, const: dict[str, int]):
-        self.lat = pos['latitude']
-        self.long = pos['longitude']
-        self.alt = pos['altitude']
-        self.zona = pos['timezone']
+        self.lat = float(pos['latitude'])
+        self.long = float(pos['longitude'])
+        self.alt = float(pos['altitude'])
+        self.zona = float(pos['timezone'])
 
         self.JD_zona = JD - self.zona/24
 
-        self.KA = const['KA']
-        self.h_isya = const['h_isya']
-        self.h_subuh = const['h_subuh']
-        self.cor = const['koreksi']
+        self.KA = float(const['KA'])
+        self.h_isya = float(const['h_isya'])
+        self.h_subuh = float(const['h_subuh'])
+        self.cor = float(const['koreksi'])
 
     def acot(self, x):
         return atan(1/x)
@@ -180,12 +185,12 @@ class prayer_time:
         h_ashar = (180/pi)*self.acot(ashar_alt)
         h_maghrib = -0.83333-0.0347*sqrt(self.alt)
 
-        subuh_time = transit - self.hour_angle(self.h_subuh)/15
-        rise_time = transit - self.hour_angle(h_maghrib)/15
+        subuh_time = transit - self.hour_angle(delta, -1*self.h_subuh, self.lat)/15
+        rise_time = transit - self.hour_angle(delta, h_maghrib, self.lat)/15
         dhuhur_time = transit
-        ashar_time = transit + self.hour_angle(h_ashar)/15
-        maghrib_time = transit + self.hour_angle(h_maghrib)/15
-        isya_time = transit + self.hour_angle(self.h_isya)/15
+        ashar_time = transit + self.hour_angle(delta, h_ashar, self.lat)/15
+        maghrib_time = transit + self.hour_angle(delta, h_maghrib, self.lat)/15
+        isya_time = transit + self.hour_angle(delta, -1*self.h_isya, self.lat)/15
 
         sholat = {
             'subuh': f'{int(subuh_time):02d}:{int(subuh_time%1*60):02d}',
@@ -196,3 +201,21 @@ class prayer_time:
             'isya': f'{int(isya_time):02d}:{int(isya_time%1*60):02d}'
         }
         return sholat
+
+def prayer_table(date: dict[str, float], pos: dict[str, float], const: dict[str, int]):
+    table = [['Tgl. Masehi', 'Subuh', 'Terbit', 'Dhuhur', 'Ashar', 'Maghrib', 'Isya']]
+    date_copy = copy.deepcopy(date)
+    date_in_month = greg_month[date_copy['month_name']]
+    for day in range(1, date_in_month+1):
+        date_copy['day'] = day
+        date_masehi_str = f"{day}/{date['month']}/{date['year']}"
+
+        JD = Greg_to_JD(date_copy)
+        time = prayer_time(pos, JD, const)
+        time = time.prayer()
+        subuh = time['subuh']; terbit = time['terbit']; dhuhur = time['dhuhur']
+        ashar = time['ashar']; maghrib = time['maghrib']; isya = time['isya']
+
+        table.append([date_masehi_str, subuh, terbit, dhuhur, ashar, maghrib,
+                      isya])
+    return table

@@ -11,3 +11,13 @@ def date_string(date_greg, date_hijri):
 date_greg = utils_prayer.get_today()
 date_hijri = utils_prayer.Greg_to_Hij(date_greg)
 date_text = date_string(date_greg, date_hijri)
+
+#Mengambil dataset pada main.py
+dataset = dataset_open.open_data()
+provinces = dataset_open.get_provinces(dataset)
+
+def cities(province, dataset=dataset):
+    return dataset_open.get_cities(province, dataset)
+
+def position_parameter(province, city, dataset = dataset):
+    return dataset_open.get_value(province, city, dataset)
