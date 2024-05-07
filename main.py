@@ -1,6 +1,6 @@
 import customtkinter as CTT
 from PIL import Image
-import dataset_open, utils_prayer #perlu update, gabungkan utils_main dengan fungsi lain
+import dataset_open, utils_prayer
 from ctk_scrollable_dropdown.ctk_scrollable_dropdown import *
 import CTkTable
 """GUI Program"""
@@ -203,6 +203,7 @@ table_data0 = [['', '', '', '', '', '', ''] for i in range (1,32)]
 table = CTkTable.CTkTable(master = table_frame, colors = ['#98BAD5', '#C6D3E3'], header_color='#506288', values=table_data0)
 table.pack(expand = True)
 #update value--------------------------------------------------------------------------------------------------------------------------------
+
 def get_waktu_sholat():
     pos = dataset_open.get_value(provinsi_option.get(), kota_option.get())
     JD = utils_prayer.Greg_to_JD(utils_prayer.date_greg)
@@ -230,9 +231,7 @@ def fill_table():
     table.configure(values = table_data)
     day = date['day']
     refresh_button.configure(fg_color = '#0A2472')
-    table.edit_row(day, text_color="#E30909")
 
-    
 
 def kota_dropdown_command(city):
     kota_option.set(city)

@@ -98,6 +98,13 @@ def Hij_to_JD(date: dict[str, int]) -> float:
     return JD
 
 def Greg_to_Hij(date: dict[str, int]) -> dict[str, int]:
+    '''
+    Konversi tanggal Gregorian menuju Hijriyah
+    Input: 
+        date (Tanggal Gregorian)
+    Output:
+        hijri_date (Tanggal Hijriyah)
+    '''
     JD = Greg_to_JD(date) -1.5
     sum_of_Hij = 30*354+11
     JD_Hij = JD - 1948438.5 #JD dimulai dari 0 Muharram 1 H
@@ -120,12 +127,15 @@ def Greg_to_Hij(date: dict[str, int]) -> dict[str, int]:
             break
         else:
             day -= hijri_month[m]
-    hijri_dict = {'day': day, 'month': month, 'year': year}
-    return hijri_dict
+    hijri_date = {'day': day, 'month': month, 'year': year}
+    return hijri_date
     
 
 #Fungsi untuk mendapatkan tanggal saat ini
-def get_today():
+def get_today() -> dict[str, int]:
+    '''
+    Mendapatkan Tanggal Saat ini Menggunakan modul datetime
+    '''
     dt = datetime.now()
     date = [int(i) for i in dt.strftime('%d %m %Y %H %M').split(' ')]
     greg_month_name = [month for month in greg_month.keys()]
@@ -134,18 +144,29 @@ def get_today():
     return date_dict
 
 #Fungsi untuk parsing tanggal menjadi string pada main.py
-def date_string(date_greg, date_hijri):
+def date_string(date_greg, date_hijri) -> str:
+    '''
+    Parsing tanggal yang didapat dari dict menuju str,
+    menggabungkan tanggal Gregorian dan Hijriyah
+    Input:
+        date_greg (tanggal gregorian),
+        date_hijri (tanggal hijriyah)
+    Output:
+        str_full (tanggal dalam str)
+    '''
     str_greg = f"{date_greg['day']} {date_greg['month_name']} {date_greg['year']}"
     str_hijr = f"{int(date_hijri['day'])} {date_hijri['month']} {date_hijri['year']}"
     str_full = " / ".join([str_greg, str_hijr])
     return str_full
 
+#Hasil Parsing
 date_greg = get_today()
 date_hijri = Greg_to_Hij(date_greg)
 date_text = date_string(date_greg, date_hijri)
 
 #Algoritma untuk waktu sholat
 class prayer_time:
+    '''Constructor'''
     def __init__(self, pos: dict[str, float], JD: float, const: dict[str, int]):
         self.lat = float(pos['latitude'])
         self.long = float(pos['longitude'])
@@ -160,20 +181,26 @@ class prayer_time:
         self.cor = float(const['koreksi'])
 
     def acot(self, x):
+        '''fungsi acot
+        input: x; output: acot(x)'''
         return atan(1/x)
     
     def time_angle(self, JD):
+        '''mendapatkan nilai time angle berdasarkan JD
+        input: JD; output: T(time_angle)'''
         T = 2*pi*(JD-245145)/365.25
         return T
     
-    def sun_declination(self, time_angle, JD):
+    def sun_declination(self, time_angle: object, JD: float) -> float:
+        '''mendapatkan nilai delta (deklinasi matahari)'''
         T = time_angle(JD)
         delta = (0.37877+23.264*sin((radians(57.297*T-79.547))) +
                 0.3812*sin((radians(57.297*2*T-82.682)))+
                 0.17132*sin((radians(57.297*3*T-59.722))))
         return delta
     
-    def equation_of_time(self, JD):
+    def equation_of_time(self, JD: float) -> float:
+        '''mendapatkan nilai EoT(persamaan waktu)'''
         U = (JD-245145)/36525
         L0 = 280.46607+36000.7698*U #mean latitude of the sun
 
@@ -183,11 +210,13 @@ class prayer_time:
                 -212*sin(4*radians(L0)))/1000
         return ET
     
-    def hour_angle(self, delta, h, lat):
+    def hour_angle(self, delta, h, lat) -> float:
+        '''mendapatkan nilai hout angle tiap waktu sholat'''
         x = (sin(radians(h))-sin(radians(lat))*sin(radians(delta)))/(cos(radians(lat))*cos(radians(delta)))
         return degrees(acos(x))
     
-    def prayer(self):
+    def prayer(self) -> dict[str, float]:
+        '''mendapatkan waktu sholat'''
         ET = self.equation_of_time(self.JD_zona)
         delta = self.sun_declination(self.time_angle, self.JD_zona)
         transit = 12+self.zona-self.long/15-ET/60
@@ -198,7 +227,7 @@ class prayer_time:
 
         subuh_time = transit - self.hour_angle(delta, -1*self.h_subuh, self.lat)/15
         rise_time = transit - self.hour_angle(delta, h_maghrib, self.lat)/15
-        dhuhur_time = transit
+        dhuhur_time = transit + self.cor/60
         ashar_time = transit + self.hour_angle(delta, h_ashar, self.lat)/15
         maghrib_time = transit + self.hour_angle(delta, h_maghrib, self.lat)/15
         isya_time = transit + self.hour_angle(delta, -1*self.h_isya, self.lat)/15
@@ -206,14 +235,23 @@ class prayer_time:
         sholat = {
             'subuh': f'{int(subuh_time):02d}:{int(subuh_time%1*60):02d}',
             'terbit': f'{int(rise_time):02d}:{int(rise_time%1*60):02d}',
-            'dhuhur': f'{int(dhuhur_time):02d}:{int(dhuhur_time%1*60 + self.cor):02d}',
+            'dhuhur': f'{int(dhuhur_time):02d}:{int(dhuhur_time%1*60):02d}',
             'ashar': f'{int(ashar_time):02d}:{int(ashar_time%1*60):02d}',
             'maghrib': f'{int(maghrib_time):02d}:{int(maghrib_time%1*60):02d}',
             'isya': f'{int(isya_time):02d}:{int(isya_time%1*60):02d}'
         }
         return sholat
 
-def prayer_table(date: dict[str, float], pos: dict[str, float], const: dict[str, int]):
+def prayer_table(date: dict[str, float], pos: dict[str, float], const: dict[str, int]) -> list[list]:
+    '''
+    Digunakan untuk membuat tabel pada main.py
+    Input:
+        date(tanggal gregorian),
+        pos (value[long,lat,alt,tz] dari sebuah region, lihat dataset_open)
+        const (nilai konstanta prayer)
+    Output:
+        list tabel
+    '''
     table = [['Tgl. Masehi', 'Subuh', 'Terbit', 'Dhuhur', 'Ashar', 'Maghrib', 'Isya']]
     date_copy = copy.deepcopy(date)
     date_in_month = greg_month[date_copy['month_name']]
