@@ -1,6 +1,6 @@
 import customtkinter as CTT
 from PIL import Image
-import utils_main, utils_prayer #perlu update, gabungkan utils_main dengan fungsi lain
+import dataset_open, utils_prayer #perlu update, gabungkan utils_main dengan fungsi lain
 from ctk_scrollable_dropdown.ctk_scrollable_dropdown import *
 import CTkTable
 """GUI Program"""
@@ -204,8 +204,8 @@ table = CTkTable.CTkTable(master = table_frame, colors = ['#98BAD5', '#C6D3E3'],
 table.pack(expand = True)
 #update value--------------------------------------------------------------------------------------------------------------------------------
 def get_waktu_sholat():
-    pos = utils_main.position_parameter(provinsi_option.get(), kota_option.get())
-    JD = utils_prayer.Greg_to_JD(utils_main.date_greg)
+    pos = dataset_open.get_value(provinsi_option.get(), kota_option.get())
+    JD = utils_prayer.Greg_to_JD(utils_prayer.date_greg)
     const = {'KA': utils_prayer.bayangan_ashar[bayangan_ashar_option.get()], 'h_isya': ketinggian_isya_option.get(),
              'h_subuh': ketinggian_shubuh_option.get(), 'koreksi': koreksi_dhuhur_option.get()}
     waktu_sholat = utils_prayer.prayer_time(pos = pos, JD = JD, const = const)
@@ -222,10 +222,10 @@ def get_waktu_sholat():
 
 
 def fill_table():
-    pos = utils_main.position_parameter(provinsi_option.get(), kota_option.get())
+    pos = dataset_open.get_value(provinsi_option.get(), kota_option.get())
     const = {'KA': utils_prayer.bayangan_ashar[bayangan_ashar_option.get()], 'h_isya': ketinggian_isya_option.get(),
              'h_subuh': ketinggian_shubuh_option.get(), 'koreksi': koreksi_dhuhur_option.get()}
-    date = utils_main.date_greg
+    date = utils_prayer.date_greg
     table_data = utils_prayer.prayer_table(date, pos, const)
     table.configure(values = table_data)
     day = date['day']
@@ -239,7 +239,7 @@ def kota_dropdown_command(city):
     kota = kota_option.get()
     provinsi = provinsi_option.get()
 
-    parameter_posisi = utils_main.position_parameter(provinsi, kota)
+    parameter_posisi = dataset_open.get_value(provinsi, kota)
 
     param_coordinate.configure(text = f"Koordinat: {float(parameter_posisi['latitude']):.3f},{float(parameter_posisi['longitude']):.3f} ")
     param_altitude.configure(text = f"Ketinggian: {parameter_posisi['altitude']} MDPL")
@@ -252,7 +252,7 @@ def provinsi_dropdown_command(province):
     kota_option.set(' ')
     provinsi = provinsi_option.get()
 
-    kota_dropdown = CTkScrollableDropdown(kota_option, values = utils_main.cities(provinsi), command = kota_dropdown_command)
+    kota_dropdown = CTkScrollableDropdown(kota_option, values = dataset_open.get_cities(provinsi), command = kota_dropdown_command)
 
 def month_dropdown_command(month):
     month_text.set(month)
@@ -263,15 +263,15 @@ def month_dropdown_command(month):
                                          command = lambda x: day_text.set(x))
 
 def enter_command():
-    utils_main.date_greg['day'] = int(day_text.get())
-    utils_main.date_greg['month_name'] = month_text.get()
-    utils_main.date_greg['year'] = int(year_text.get())
+    utils_prayer.date_greg['day'] = int(day_text.get())
+    utils_prayer.date_greg['month_name'] = month_text.get()
+    utils_prayer.date_greg['year'] = int(year_text.get())
     month_num = int([i for i in utils_prayer.greg_month.keys()].index(month_text.get()))+1
-    utils_main.date_greg['month'] = month_num
-    utils_main.date_hijri = utils_prayer.Greg_to_Hij(utils_main.date_greg)
-    utils_main.date_text = utils_main.date_string(utils_main.date_greg, utils_main.date_hijri)
+    utils_prayer.date_greg['month'] = month_num
+    utils_prayer.date_hijri = utils_prayer.Greg_to_Hij(utils_prayer.date_greg)
+    utils_prayer.date_text = utils_prayer.date_string(utils_prayer.date_greg, utils_prayer.date_hijri)
 
-    header_date.configure(text = utils_main.date_text)
+    header_date.configure(text = utils_prayer.date_text)
     get_waktu_sholat()
 
 def refresh_button_command():
@@ -290,7 +290,7 @@ def ketinggian_isya_dropdown_command(x):
     ketinggian_isya_option.set(x)
     get_waktu_sholat()
 
-provinsi_dropdown = CTkScrollableDropdown(provinsi_option, values=utils_main.provinces, command = provinsi_dropdown_command)
+provinsi_dropdown = CTkScrollableDropdown(provinsi_option, values=dataset_open.provinces, command = provinsi_dropdown_command)
 
 koreksi_dhuhur_dropdown = CTkScrollableDropdown(koreksi_dhuhur_option, values = utils_prayer.koreksi_dhuhur,
                                                 command = koreksi_dhuhur_dropdown_command)
@@ -305,11 +305,11 @@ month_dropdown = CTkScrollableDropdown(month_text, values = [i for i in utils_pr
 enter_button.configure(command = enter_command)
 refresh_button.configure(command = refresh_button_command)
 #initial value--------------------------------------------------------------------------------------------------------------------------
-header_date.configure(text = utils_main.date_text)
+header_date.configure(text = utils_prayer.date_text)
 
-day_text.set(utils_main.date_greg['day'])
-year_text.insert(0,str(utils_main.date_greg['year']))
-month_dropdown_command(utils_main.date_greg['month_name'])
+day_text.set(utils_prayer.date_greg['day'])
+year_text.insert(0,str(utils_prayer.date_greg['year']))
+month_dropdown_command(utils_prayer.date_greg['month_name'])
 
 provinsi_dropdown_command('DKI JAKARTA')
 kota_dropdown_command('KOTA JAKARTA PUSAT')

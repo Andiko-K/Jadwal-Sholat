@@ -29,14 +29,17 @@ def open_data(link = './dataset/dataset_region.csv') -> dict[str, float]:
 def get_provinces(data):
     return [key for key in data.keys()]
 
-def get_cities(province, data):
+dataset = open_data()
+provinces = get_provinces(dataset)
+
+def get_cities(province, data = dataset):
     try:
         city_list = [key for key in data[province].keys()]
     except:
         city_list = []
     return city_list
 
-def get_value(province, city, data):
+def get_value(province, city, data = dataset):
     return data[province][city]
 
 ### Metode untuk mendapatkan lokasi pengguna melalui IP Address
